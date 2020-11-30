@@ -1,0 +1,32 @@
+name: test
+
+on:
+  push:
+  pull_request:
+jobs:
+  pytest:
+    name: Run tests with pytest
+    # https://docs.github.com/ja/free-pro-team@latest/actions/reference/workflow-syntax-for-github-actions
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+        python-version: [3.8, 3.9]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: getong/mongo-action@v1.1
+        with:
+          mongo version: '4.2-bionic'
+          host port: 27017
+          mongo username: 'testuser'
+          mongo password: 'tesrpass'
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2.1.4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: atu4403/poetry-setup-multi-platform@v1
+      - name: Install Dependencies
+        run: poetry install --no-interaction
+      - name: Run Tests
+        run: poetry run pytest tests/
